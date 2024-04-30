@@ -4,3 +4,7 @@ psycopg2
 requests
 python-multipart
 sqlalchemy
+werkzeug
+python-dotenv
+alembic
+python-dotenv
