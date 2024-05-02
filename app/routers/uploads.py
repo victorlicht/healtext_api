@@ -3,10 +3,11 @@ from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 import configs.db as db
 import utils.upload_ehr as upload
+import tasks.sections as s
 from fastapi import APIRouter
 import logging
-logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/documents",
@@ -29,9 +30,10 @@ async def upload_ehr(file: UploadFile = File(...),
         dict: Dictionary containing information about the uploaded document or an error message.
     """
     
-
     try:
         uploaded = upload.upload_document(session, file, uid)
+        se = s.sections_extraction(session, uploaded)
+        ehr = s.insert_processed_ehr(session, uploaded, se)
     except Exception as e:
         session.rollback()
         logger.error(f"Error: {str(e)}")
@@ -45,7 +47,9 @@ async def upload_ehr(file: UploadFile = File(...),
         status_code=status.HTTP_201_CREATED,
         content={
             "message": "Document uploaded successfully",
-            "id": uploaded
+            "id": uploaded,
+            "sections": se,
+            "processed_ehr": ehr
         },
         media_type="application/json"
     )

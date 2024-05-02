@@ -1,5 +1,5 @@
 import datetime
-from sqlalchemy import Column, String, Text, Boolean, TIMESTAMP, JSON, ForeignKey
+from sqlalchemy import Column, String, Text, Boolean, TIMESTAMP, JSON, ForeignKey, ARRAY
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 import uuid
@@ -38,9 +38,9 @@ class EhrUpload(Base):
 class Category(Base):
     __tablename__ = "categories"
 
-    id = Column(String(36), primary_key=True, default=uuid.uuid4)
-    category = Column(String, nullable=False)
-    category_values = Column(Text, nullable=False)
+    category_id = Column(String, primary_key=True)
+    category_value = Column(Text, nullable=False)
+    additional_values = Column(ARRAY(String), nullable=True)
 
 
 class ProcessedEhr(Base):
@@ -51,7 +51,6 @@ class ProcessedEhr(Base):
     family_history = Column(Text)
     medications = Column(Text)
     lab_tests = Column(Text)
-    category_id = Column(String(36), ForeignKey("categories.id"))
     doc_id = Column(String(36), ForeignKey("ehr_uploads.id"), nullable=False)
 
 
