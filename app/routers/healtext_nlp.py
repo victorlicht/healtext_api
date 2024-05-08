@@ -3,7 +3,11 @@ from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 import configs.db as db
 import utils.upload_ehr as upload
-import tasks.sections as s
+import tasks.sections as sections
+import nlp.preprocess as preprocess
+import nlp.symptoms_extractions as sy
+import nlp.lab_results_extractions as lab
+
 from fastapi import APIRouter
 import logging
 
@@ -15,25 +19,17 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 @router.post("/upload")
-async def upload_ehr(file: UploadFile = File(...),
-                    uid: str = Form(...),
-                    session: Session = Depends(db.get_session)):
-    """
-    Uploads a document and stores it in the database and data/ehr directory.
-
-    Args:
-        file (werkzeug.datastructures.FileStorage): Uploaded document file object.
-        uid (str): Unique identifier for the user uploading the document.
-        session (sqlalchemy.orm.Session): Database session object (injected by dependency).
-
-    Returns:
-        dict: Dictionary containing information about the uploaded document or an error message.
-    """
-    
+async def upload_ehr(file: UploadFile = File(...), uid: str = Form(...), session: Session = Depends(db.get_session)):
     try:
         uploaded = upload.upload_document(session, file, uid)
-        se = s.sections_extraction(session, uploaded)
-        ehr = s.insert_processed_ehr(session, uploaded, se)
+        extracted_sections = sections.sections_extraction(session, uploaded)
+        inserted_sections = sections.insert_processed_ehr(session, uploaded, extracted_sections)
+        processed_sections = preprocess.preprocess_text(session, uploaded)
+        labs_text = preprocess.preprocess_lab_tests_text(session, uploaded)
+        detected_diabetes_symptoms = sy.detect_symptoms_diabetes(processed_sections, sy.DIABETES_SYMPTOMS)
+        print(type(labs_text), type(processed_sections), type(detected_diabetes_symptoms))
+
+
     except Exception as e:
         session.rollback()
         logger.error(f"Error: {str(e)}")
@@ -48,8 +44,9 @@ async def upload_ehr(file: UploadFile = File(...),
         content={
             "message": "Document uploaded successfully",
             "id": uploaded,
-            "sections": se,
-            "processed_ehr": ehr
+            "processed_sections": processed_sections,
+            "symptoms": detected_diabetes_symptoms,
+            "labs": labs_text
         },
         media_type="application/json"
     )

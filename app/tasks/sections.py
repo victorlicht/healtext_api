@@ -1,11 +1,7 @@
-import json
 import os
 import re
-import difflib
 import uuid
-from sqlalchemy.orm import sessionmaker, exc
-import utils.upload_ehr as upload
-import routers.uploads as up
+from sqlalchemy.orm import sessionmaker
 from models.models import Category, ProcessedEhr
 
 
@@ -15,8 +11,6 @@ def create_path(folder, id):
 
 
 def get_category_data(db_session: sessionmaker):
-    """Retrieves all categories from the database and returns their data as dictionaries."""
-
     categories = db_session.query(Category).all()
     category_data = []
     for category in categories:
@@ -24,8 +18,6 @@ def get_category_data(db_session: sessionmaker):
     return category_data
 
 def get_category_dict(category_object):
-    """Extracts relevant data from a Category model object and returns a dictionary."""
-
     return {
         "category_id": category_object.category_id,
         "category_value": category_object.category_value,
@@ -34,16 +26,6 @@ def get_category_dict(category_object):
 
 
 def sections_extraction(db_session: sessionmaker, doc_id):
-    """Extracts sections from a document based on categories and their additional values in the database.
-
-    Args:
-        db_session: A SQLAlchemy sessionmaker object.
-        doc_id: The ID of the document to extract sections from.
-
-    Returns:
-        A dictionary mapping extracted section titles (lowercase) to their content (strings), or an empty dictionary if no sections are found.
-    """
-
     doc_path = create_path("ehr", doc_id)
     targete_section = False
     sections = {}
@@ -70,15 +52,6 @@ def sections_extraction(db_session: sessionmaker, doc_id):
 
 
 def _matches_category_or_additional_values(section_title, db_session):
-    """Checks if a section title matches a category or any of its additional values in the database (case-insensitively).
-
-    Args:
-        section_title: The section title to check (lowercase).
-        db_session: A SQLAlchemy sessionmaker object.
-
-    Returns:
-        True if the section title contains a category value or any of its additional values, False otherwise.
-    """
     lowercase_section_title = section_title.lower()
     categories = get_category_data(db_session)
     for category in categories:
@@ -105,13 +78,10 @@ def insert_processed_ehr(db_session, doc_id, sections):
                 processed_data[category_id]['content'] += (" " + real_content.strip()) 
             else:
                 processed_data[category_id] = {'content': real_content.strip(), 'doc_id': doc_id}
-        else:
-            print(f"Content missing for category ID {category_id}")
 
     inserted_data = {}
     
     for category_id, data in processed_data.items():
-        print(category_id, data)
         if category_id == "hpi":
             inserted_data["hpi"] = data["content"]
         elif category_id == "fh":
@@ -120,15 +90,9 @@ def insert_processed_ehr(db_session, doc_id, sections):
             inserted_data["medications"] = data["content"]
         elif category_id == "lab":
             inserted_data["lab_tests"] = data["content"]
-        else:
-            print(f"Ignoring unknown category ID: {category_id}")
 
-    try:      # Insert data into the database
-        processed_ehr = ProcessedEhr(id = processed_ehr_id, **inserted_data, doc_id=doc_id)
-        db_session.add(processed_ehr)
-        db_session.commit()
-    except Exception as e:
-        print(f"Error inserting data for category ID {category_id}: {e}")
-        db_session.rollback()
-    print(f"Successfully inserted processed EHR data for document {doc_id}.")
+    processed_ehr = ProcessedEhr(id = processed_ehr_id, **inserted_data, doc_id=doc_id)
+    db_session.add(processed_ehr)
+    db_session.commit()
+    db_session.rollback()
     return inserted_data
