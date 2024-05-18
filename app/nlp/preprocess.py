@@ -7,7 +7,7 @@ from nltk.corpus import stopwords, wordnet
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from models.models import ProcessedEhr
-from nlp.lab_results_extractions import extract_results
+from nlp.lab_results_extractions import extract_results, parse_and_store_lab_results
 # from .symptoms_extractions import detect_symptoms, NEGATION_PHRASES, DIABETES_SYMPTOMS
 NEGATION_PHRASES = ['deny', 'denies', 'no', 'not', 'without', 'never', 'none', 'neither', 'nor', 'nowhere', 'n\'t']
 
@@ -136,8 +136,7 @@ def preprocess_text(db_session: sessionmaker, doc_id):
 def preprocess_medications_text(db_session: sessionmaker, doc_id):
     return None
 
-def preprocess_lab_tests_text(db_session: sessionmaker, doc_id):
+def preprocess_lab_tests_text(db_session: sessionmaker, doc_id, ill_diagnosed):
     filtered_text = filter_noise(get_lab_tests(db_session, doc_id))
-    print(filtered_text)
-    return extract_results(filtered_text)
+    return extract_results(db_session, filtered_text, doc_id, ill_diagnosed)
     

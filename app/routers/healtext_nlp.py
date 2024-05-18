@@ -25,10 +25,9 @@ async def upload_ehr(file: UploadFile = File(...), uid: str = Form(...), session
         extracted_sections = sections.sections_extraction(session, uploaded)
         inserted_sections = sections.insert_processed_ehr(session, uploaded, extracted_sections)
         processed_sections = preprocess.preprocess_text(session, uploaded)
-        labs_text = preprocess.preprocess_lab_tests_text(session, uploaded)
+        labs_text = preprocess.preprocess_lab_tests_text(session, uploaded, "Diabetes")
         detected_diabetes_symptoms = sy.detect_symptoms_diabetes(processed_sections, sy.DIABETES_SYMPTOMS)
         sy.insert_symptoms(session, detected_diabetes_symptoms, uploaded)
-        print(type(labs_text), type(processed_sections), type(detected_diabetes_symptoms))
 
 
     except Exception as e:

@@ -1,5 +1,5 @@
 import datetime
-from sqlalchemy import Column, String, Text, Boolean, TIMESTAMP, JSON, ForeignKey, ARRAY
+from sqlalchemy import Column, DateTime, String, Text, TIMESTAMP, JSON, ForeignKey, ARRAY
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 import uuid
@@ -78,6 +78,7 @@ class LabResult(Base):
     id = Column(String(36), primary_key=True, default=uuid.uuid4)
     test_name = Column(String(128), nullable=False)
     value = Column(Text, nullable=False)
+    date_time = Column(DateTime, nullable=False)
     doc_id = Column(String(36), ForeignKey("ehr_uploads.id"), nullable=False)
     ill_diagnosed = Column(String(128), nullable=False)
 

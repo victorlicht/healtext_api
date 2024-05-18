@@ -1,5 +1,6 @@
+from datetime import datetime
 import re
-
+from models.models import LabResult
 
 def extract_time(text):
     #Extract Time from text
@@ -64,7 +65,7 @@ def split_text_by_date_time(text):
     
     return chunks
 
-def extract_results(text):
+def extract_results(db_session, text, doc_id, ill_diagnosed):
     chunks = split_text_by_date_time(text)
     results = {}
 
@@ -84,4 +85,23 @@ def extract_results(text):
                         test_count += 1
         results[date_time] = test_results
 
+    parse_and_store_lab_results(db_session, results, doc_id, ill_diagnosed)
     return results
+
+def parse_and_store_lab_results(db_session, results, doc_id, ill_diagnosed):
+
+    for date_time_str, tests in results.items():
+        date_str, time_str = date_time_str.split()
+        combined_datetime = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %I:%M%p")
+
+        for test_key, test_info in tests.items():
+            lab_result = LabResult(
+                test_name=test_info["name"],
+                value=test_info["value"],
+                date_time=combined_datetime,
+                doc_id=doc_id,
+                ill_diagnosed=ill_diagnosed
+            )
+            db_session.add(lab_result)
+
+    db_session.commit()
