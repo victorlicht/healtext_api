@@ -59,8 +59,7 @@ class Symptom(Base):
 
     id = Column(String(36), primary_key=True, default=uuid.uuid4)
     symptom = Column(String, nullable=False)
-    is_found = Column(Boolean, nullable=False)
-    ill_diagnosed = Column(Boolean, nullable=False)
+    ill_diagnosed = Column(String(128), nullable=False)
     doc_id = Column(String(36), ForeignKey("ehr_uploads.id"), nullable=False)
 
 
@@ -68,9 +67,8 @@ class FamilyHistory(Base):
     __tablename__ = "family_history"
 
     id = Column(String(36), primary_key=True, default=uuid.uuid4)
-    condition_name = Column(String, nullable=False)
-    is_found = Column(Boolean, nullable=False)
-    ill_diagnosed = Column(Boolean, nullable=False)
+    condition_name = Column(String(256), nullable=False)
+    ill_diagnosed = Column(String(128), nullable=False)
     doc_id = Column(String(36), ForeignKey("ehr_uploads.id"), nullable=False)
 
 
@@ -78,10 +76,10 @@ class LabResult(Base):
     __tablename__ = "lab_result"
 
     id = Column(String(36), primary_key=True, default=uuid.uuid4)
-    test_name = Column(String, nullable=False)
+    test_name = Column(String(128), nullable=False)
     value = Column(Text, nullable=False)
     doc_id = Column(String(36), ForeignKey("ehr_uploads.id"), nullable=False)
-    ill_diagnosed = Column(Boolean, nullable=False)
+    ill_diagnosed = Column(String(128), nullable=False)
 
 
 class Medication(Base):
@@ -92,7 +90,7 @@ class Medication(Base):
     medication_family = Column(String)
     dosage = Column(Text)
     doc_id = Column(String(36), ForeignKey("ehr_uploads.id"), nullable=False)
-    ill_diagnosed = Column(Boolean, nullable=False)
+    ill_diagnosed = Column(String(128), nullable=False)
 
 
 class Result(Base):
@@ -102,4 +100,3 @@ class Result(Base):
     timestamp = Column(TIMESTAMP, nullable=False, default=datetime.datetime.now)
     doc_id = Column(String(36), ForeignKey("ehr_uploads.id"), nullable=False)
     ill_results = Column(JSON, nullable=False)
-

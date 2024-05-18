@@ -1,5 +1,3 @@
-
-import datetime
 import re
 
 
@@ -27,20 +25,56 @@ DIABETES_TESTS = {
     "C-PEPTIDE": "C-Peptide",
     "KETONES": "Ketones",
     "UREA N": "Blood Urea Nitrogen (BUN)",
-    "GLYCOSYLATED HEMOGLOBIN": "Glycosylated Hemoglobin"  # Include alternate names
+    "PT": "Glycosylated Hemoglobin",
+    "PH": "PH",
+    "RBC": "Fructosamine",
+    "Potassium ": "Potassium",
+    "CO2": "Total CO2",
 }
 
+
+def extract_date_time(text):
+    # Extract Date and Time from text
+    date_time_pattern = r"(\d{4}-\d{1,2}-\d{1,2}) (\d{1,2}:\d{2}(?:\s*(?:AM|PM))?)"
+    compiled_pattern = re.compile(date_time_pattern)
+    
+    date_times = []
+    for match in compiled_pattern.finditer(text):
+        date_times.append((match.group(1), match.group(2)))
+    
+    return date_times
+
+def split_text_by_date_time(text):
+    date_times = extract_date_time(text)
+    chunks = {}
+    
+    for i in range(len(date_times)):
+        date, time = date_times[i]
+        date_time_str = f"{date} {time}"
+        if i == len(date_times) - 1:
+            # Last date-time occurrence, take the substring from this date-time to the end
+            chunks[date_time_str] = text[text.index(date_time_str) + len(date_time_str):].strip()
+        else:
+            # Substring between two date-time occurrences
+            next_date, next_time = date_times[i + 1]
+            next_date_time_str = f"{next_date} {next_time}"
+            start_index = text.index(date_time_str) + len(date_time_str)
+            end_index = text.index(next_date_time_str)
+            chunks[date_time_str] = text[start_index:end_index].strip()
+    
+    return chunks
+
 def extract_results(text):
-    chunks = split_text_by_time(text)
+    chunks = split_text_by_date_time(text)
     results = {}
 
-    for time, chunk in chunks.items():
+    for date_time, chunk in chunks.items():
         test_results = {}
         test_count = 1
         for word in chunk.split():
             for test, full_name in DIABETES_TESTS.items():
-                if test.upper() in word.upper():
-                    value_match = re.search(rf"\b{re.escape(test)}(\d+)\b", word)
+                if test.upper() in word.upper().replace("-", " "):
+                    value_match = re.search(rf"{re.escape(test)}-(\d+(?:\.\d+)?)\*?", word, re.IGNORECASE)
                     if value_match:
                         test_value = value_match.group(1)
                         test_results[f"test{test_count}"] = {
@@ -48,25 +82,6 @@ def extract_results(text):
                             "value": test_value
                         }
                         test_count += 1
-        results[time] = test_results
+        results[date_time] = test_results
 
     return results
-
-
-
-
-def split_text_by_time(text):
-    times = extract_time(text)
-    chunks = {}
-
-    for i in range(len(times)):
-        if i == len(times) - 1:
-            # Last time occurrence, take the substring from this time to the end
-            chunks[times[i]] = text[text.index(times[i]) + len(times[i]):].strip()
-        else:
-            # Substring between two time occurrences
-            start_index = text.index(times[i]) + len(times[i])
-            end_index = text.index(times[i + 1])
-            chunks[times[i]] = text[start_index:end_index].strip()
-
-    return chunks

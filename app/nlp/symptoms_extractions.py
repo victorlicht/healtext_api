@@ -1,7 +1,11 @@
 import difflib
 import re
+from sqlalchemy.orm import sessionmaker
+from models.models import Symptom
 
-DIABETES_SYMPTOMS = ['blurred vision', ' thirst', 'frequent urination', 'increased hunger', 'fatigue', 'slow healing', 'numbness', 'weight loss']
+
+
+DIABETES_SYMPTOMS = ['blurred vision', 'thirst', 'frequent urination', 'increased hunger', 'fatigue', 'slow healing', 'numbness', 'weight loss']
 NEGATION_PHRASES = ['deny', 'denies', 'no', 'not', 'without', 'never', 'none', 'neither', 'nor', 'nowhere', 'n\'t']
 
 NEGATION_PATTERNS = [
@@ -23,6 +27,10 @@ NEGATION_PATTERNS = [
     r'(n\'t)',  # Handles contractions like "isn't", "wasn't", etc.
 ]
 
+def insert_symptom(db_session: sessionmaker, symptom, ill_diagnosed, doc_id):
+    insert_symptoms = Symptom(symptom=symptom, ill_diagnosed=ill_diagnosed, doc_id=doc_id)
+    db_session.add(insert_symptoms)
+    db_session.commit()
 
 def detect_negation(sentence):
     for phrase in NEGATION_PHRASES:
@@ -63,5 +71,9 @@ def detect_symptoms_diabetes(lemmatized_text, diabetes_symptoms):
         detected_symptoms.extend(found_symptoms)
 
     return detected_symptoms
+
+def insert_symptoms(db_session: sessionmaker, detected_symptoms, doc_id):
+    for detected_symptom in detected_symptoms:
+            insert_symptom(db_session, detected_symptom, "Diabetes", doc_id)
 
 

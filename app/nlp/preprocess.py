@@ -6,7 +6,6 @@ from sqlalchemy.orm import sessionmaker
 from nltk.corpus import stopwords, wordnet
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
-from datetime import datetime
 from models.models import ProcessedEhr
 from nlp.lab_results_extractions import extract_results
 # from .symptoms_extractions import detect_symptoms, NEGATION_PHRASES, DIABETES_SYMPTOMS
@@ -107,11 +106,10 @@ def split_sentence_into_phrases(sentence):
 def filter_noise(text):
   filtered_text = []
   for word in text.split():
-    if not (word.startswith("[*") or word.startswith("{*") or word.endswith("]") or word.endswith("}")):
-      # Remove punctuation and special characters except for alphanumeric and space
-        filtered_word = ''.join(c for c in word if c in string.ascii_letters + string.digits + " " + "'" + ":")
-        if filtered_word:  # Add only non-empty filtered words
-            filtered_text.append(filtered_word)
+    # Remove punctuation and special characters except for alphanumeric and space
+    filtered_word = ''.join(c for c in word if c in string.ascii_letters + string.digits + " " + "'" + ":" + "." + "-")
+    if filtered_word:  # Add only non-empty filtered words
+        filtered_text.append(filtered_word)
   return ' '.join(filtered_text)
 
 
@@ -140,5 +138,6 @@ def preprocess_medications_text(db_session: sessionmaker, doc_id):
 
 def preprocess_lab_tests_text(db_session: sessionmaker, doc_id):
     filtered_text = filter_noise(get_lab_tests(db_session, doc_id))
+    print(filtered_text)
     return extract_results(filtered_text)
     

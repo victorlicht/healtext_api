@@ -27,6 +27,7 @@ async def upload_ehr(file: UploadFile = File(...), uid: str = Form(...), session
         processed_sections = preprocess.preprocess_text(session, uploaded)
         labs_text = preprocess.preprocess_lab_tests_text(session, uploaded)
         detected_diabetes_symptoms = sy.detect_symptoms_diabetes(processed_sections, sy.DIABETES_SYMPTOMS)
+        sy.insert_symptoms(session, detected_diabetes_symptoms, uploaded)
         print(type(labs_text), type(processed_sections), type(detected_diabetes_symptoms))
 
 
@@ -44,7 +45,6 @@ async def upload_ehr(file: UploadFile = File(...), uid: str = Form(...), session
         content={
             "message": "Document uploaded successfully",
             "id": uploaded,
-            "processed_sections": processed_sections,
             "symptoms": detected_diabetes_symptoms,
             "labs": labs_text
         },
