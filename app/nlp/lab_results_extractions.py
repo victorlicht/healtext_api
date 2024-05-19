@@ -1,6 +1,7 @@
 from datetime import datetime
 import re
 from models.models import LabResult
+from nlp.diabete_dict import DIABETES_TESTS
 
 def extract_time(text):
     #Extract Time from text
@@ -13,26 +14,6 @@ def extract_time(text):
         all_times.append(time_str)
 
     return all_times
-
-
-
-# Example diabetes-related tests (modify as needed)
-DIABETES_TESTS = {
-    "GLUCOSE": "Blood Glucose",
-    "SODIUM": "Sodium",
-    "HEMOGLOBIN A1C": "Hemoglobin A1c",
-    "FRUCTOSAMINE": "Fructosamine",
-    "INSULIN": "Insulin",
-    "C-PEPTIDE": "C-Peptide",
-    "KETONES": "Ketones",
-    "UREA N": "Blood Urea Nitrogen (BUN)",
-    "PT": "Glycosylated Hemoglobin",
-    "PH": "PH",
-    "RBC": "Fructosamine",
-    "Potassium ": "Potassium",
-    "CO2": "Total CO2",
-}
-
 
 def extract_date_time(text):
     # Extract Date and Time from text

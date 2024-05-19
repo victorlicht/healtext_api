@@ -5,6 +5,7 @@ import configs.db as db
 import utils.upload_ehr as upload
 import tasks.sections as sections
 import nlp.preprocess as preprocess
+from predictions.diabetes import predict_prediabetes
 import nlp.symptoms_extractions as sy
 import nlp.lab_results_extractions as lab
 
@@ -28,6 +29,9 @@ async def upload_ehr(file: UploadFile = File(...), uid: str = Form(...), session
         labs_text = preprocess.preprocess_lab_tests_text(session, uploaded, "Diabetes")
         detected_diabetes_symptoms = sy.detect_symptoms_diabetes(processed_sections, sy.DIABETES_SYMPTOMS)
         sy.insert_symptoms(session, detected_diabetes_symptoms, uploaded)
+        predictions, prediabetes_percentage = predict_prediabetes(labs_text, detected_diabetes_symptoms)
+        print(detected_diabetes_symptoms, type(detected_diabetes_symptoms))
+        print("Prediabetes Percentage:", prediabetes_percentage)
 
 
     except Exception as e:
