@@ -1,11 +1,40 @@
 import datetime
-from sqlalchemy import Column, DateTime, String, Text, TIMESTAMP, JSON, ForeignKey, ARRAY
+from sqlalchemy import Column, Date, DateTime, String, Text, TIMESTAMP, JSON, ForeignKey, ARRAY, Boolean, Enum
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 import uuid
 
 Base = declarative_base()
 
+
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(String(36), primary_key=True)
+    created_at = Column(TIMESTAMP, nullable=False, default=datetime.datetime.now)
+    email = Column(String(128), nullable=False, unique=True)
+    phone = Column(String(128), nullable=False, unique=True)
+    password = Column(String(256), nullable=False)
+    is_active = Column(Boolean, default=True)
+    is_verified = Column(Boolean, default=False)
+    verification_token = Column(String(128), nullable=True)
+    address = Column(String(256), nullable=True)
+    full_name = Column(String(256), nullable=True)
+    date_of_birth = Column(Date)
+    gender = Column(String(20), nullable=True)
+    country = Column(String(256), nullable=True)
+    role = Column(String(10), nullable=False, default="user")
+
+class TokenTable(Base):
+    __tablename__ = "token"
+    uid = Column(String(36))
+    access_token = Column(String(450), primary_key=True)
+    refresh_token = Column(String(450),nullable=False)
+    role = Column(String(10), nullable=False, default="user")
+    status = Column(Boolean)
+    created_date = Column(DateTime, default=datetime.datetime.now)
 
 class EhrUpload(Base):
     __tablename__ = "ehr_uploads"

@@ -14,29 +14,28 @@ def predict_prediabetes(labs, symptoms):
     
     # Collect test values
     for timestamp, tests in labs.items():
-        print(f"Timestamp: {timestamp}")
         for test_key, test_data in tests.items():
             test_name = test_data["name"]
             value = float(test_data["value"]) if test_data.get("value") else None
-            print(f"{test_name}: {value}")
-            if test_name == "Blood Glucose":
-                glucose_values.append((timestamp, value))
-            elif test_name == "Hemoglobin A1c":
-                hba1c_values.append((timestamp, value))
-            elif test_name == "Total Cholesterol":
-                cholesterol_values.append((timestamp, value))
-            elif test_name == "Triglycerides":
-                triglycerides_values.append((timestamp, value))
-            elif test_name == "Serum Creatinine":
-                creatinine_values.append((timestamp, value))
-            elif test_name == "Blood Urea Nitrogen (BUN)":
-                bun_values.append((timestamp, value))
-            elif test_name == "Estimated Glomerular Filtration Rate (eGFR)":
-                egfr_values.append((timestamp, value))
-            elif test_name == "Sodium":
-                sodium_values.append((timestamp, value))
-            elif test_name == "Potassium":
-                potassium_values.append((timestamp, value))
+            if value is not None:  # Ensure only valid test values are considered
+                if test_name == "Blood Glucose":
+                    glucose_values.append((timestamp, value))
+                elif test_name == "Hemoglobin A1c":
+                    hba1c_values.append((timestamp, value))
+                elif test_name == "Total Cholesterol":
+                    cholesterol_values.append((timestamp, value))
+                elif test_name == "Triglycerides":
+                    triglycerides_values.append((timestamp, value))
+                elif test_name == "Serum Creatinine":
+                    creatinine_values.append((timestamp, value))
+                elif test_name == "Blood Urea Nitrogen (BUN)":
+                    bun_values.append((timestamp, value))
+                elif test_name == "Estimated Glomerular Filtration Rate (eGFR)":
+                    egfr_values.append((timestamp, value))
+                elif test_name == "Sodium":
+                    sodium_values.append((timestamp, value))
+                elif test_name == "Potassium":
+                    potassium_values.append((timestamp, value))
     
     # Define cutoff values for prediabetes
     glucose_cutoff = 100
@@ -63,10 +62,10 @@ def predict_prediabetes(labs, symptoms):
     ]
     
     predictions = []
-    total_tests = 0
+    total_valid_tests = 0
     for test_name, test_values in recent_tests:
         if test_values:
-            total_tests += 1
+            total_valid_tests += 1
             latest_value = max(test_values, key=lambda x: x[0])[1]
             if latest_value:
                 if test_name == "Glucose" and latest_value > glucose_cutoff:
@@ -88,17 +87,13 @@ def predict_prediabetes(labs, symptoms):
                 elif test_name == "Potassium" and latest_value > potassium_cutoff:
                     predictions.append((test_name, "Prediabetes"))
     
+    # Check for the presence of symptoms related to diabetes
     symptom_check = any(symptom in DIABETES_SYMPTOMS for symptom in symptoms)
-    
     if symptom_check:
         predictions.append(("Symptoms", "Prediabetes"))
-        total_tests += 1
 
-    # Calculate the percentage of prediabetes predictions
+    total_tests = len(recent_tests)
     prediabetes_tests = len(predictions)
-    prediabetes_percentage = (prediabetes_tests / total_tests) * 100 if total_tests > 0 else 0
+    prediabetes_percentage = (prediabetes_tests / (total_tests + 1)) * 100 if total_tests > 0 else 0  
     
     return predictions, prediabetes_percentage
-    
-    return predictions, prediabetes_percentage
-

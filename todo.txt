@@ -1,8 +1,9 @@
-Upload file*
-Get the sections we need(History of Present Illness[Symptoms], Family History, Lab Tests, Medication)*
-Get Symptoms
-Get Medications
-Get Lab Results
-Get Family Conditions
-Predect Diebets
-Return Result
+Diseases Predict (Diabetes, ...)
+End Points:
+    Results, Symptoms, Medications, Family Conditions, Lab Tests
+    Upload Document Diabetes
+PreProcess
+    2 Another Diseases
+    Medications Extract
+    Predict 2 of Another Disease
+    Add Family History in Prediction

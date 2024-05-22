@@ -1,11 +1,13 @@
 from fastapi import Depends, File, UploadFile, Form, status
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
+from schemas import schemas
+from models import models
+from jose import jwt
+from configs.config import SECRET_KEY, ALGORITHM
+from auth.bearer import JWTBearer
 import configs.db as db
-import utils.upload_ehr as upload
-import tasks.sections as sections
-import nlp.preprocess as preprocess
-from predictions.diabetes import predict_prediabetes
+from predictions.results import process_medical_document
 import nlp.symptoms_extractions as sy
 import nlp.lab_results_extractions as lab
 
@@ -19,20 +21,21 @@ router = APIRouter(
     tags=["documents"],
     responses={404: {"description": "Not found"}},
 )
-@router.post("/upload")
-async def upload_ehr(file: UploadFile = File(...), uid: str = Form(...), session: Session = Depends(db.get_session)):
+@router.post("/diabetes-prediction")
+async def upload_ehr(dependencies=Depends(JWTBearer()), file: UploadFile = File(...), session: Session = Depends(db.get_session)):
     try:
-        uploaded = upload.upload_document(session, file, uid)
-        extracted_sections = sections.sections_extraction(session, uploaded)
-        inserted_sections = sections.insert_processed_ehr(session, uploaded, extracted_sections)
-        processed_sections = preprocess.preprocess_text(session, uploaded)
-        labs_text = preprocess.preprocess_lab_tests_text(session, uploaded, "Diabetes")
-        detected_diabetes_symptoms = sy.detect_symptoms_diabetes(processed_sections, sy.DIABETES_SYMPTOMS)
-        sy.insert_symptoms(session, detected_diabetes_symptoms, uploaded)
-        predictions, prediabetes_percentage = predict_prediabetes(labs_text, detected_diabetes_symptoms)
-        print(detected_diabetes_symptoms, type(detected_diabetes_symptoms))
-        print("Prediabetes Percentage:", prediabetes_percentage)
-
+        token = dependencies
+        payload = jwt.decode(token, SECRET_KEY, ALGORITHM)
+        user_id = payload['sub']
+        existing_token = session.query(models.TokenTable).filter(
+            models.TokenTable.uid == user_id,
+            models.TokenTable.access_token == token
+        ).first()
+        if existing_token: 
+            return process_medical_document(session, file, user_id, "diabetes")
+        else:
+            return {"message": "Invalid or expired token"}
+    
 
     except Exception as e:
         session.rollback()
