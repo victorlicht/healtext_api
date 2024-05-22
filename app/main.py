@@ -1,9 +1,9 @@
 from fastapi import FastAPI
-from routers.healtext_nlp import router
-from routers.server import server_router
-from routers.auth import router as auth_router
-from routers.users import router as users_router
-from routers.admin import router as admin_router
+from app.routers.healtext_nlp import router
+from app.routers.server import server_router
+from app.routers.auth import router as auth_router
+from app.routers.users import router as users_router
+from app.routers.admin import router as admin_router
 
 from fastapi.middleware.cors import CORSMiddleware
 

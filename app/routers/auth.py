@@ -2,15 +2,15 @@ import datetime
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from schemas import schemas
-from models import models
-from configs.db import get_session
+from app.schemas import schemas
+from app.models import models
+from app.configs.db import get_session
 import uuid
 from jose import jwt
-from configs.config import SECRET_KEY, ALGORITHM
-from auth.bearer import JWTBearer
-from auth.email_verification import send_verification_email
-from auth.utils import verify_password, create_access_token, create_refresh_token, get_hashed_password
+from app.configs.config import SECRET_KEY, ALGORITHM
+from app.auth.bearer import JWTBearer
+from app.auth.email_verification import send_verification_email
+from app.auth.utils import verify_password, create_access_token, create_refresh_token, get_hashed_password
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

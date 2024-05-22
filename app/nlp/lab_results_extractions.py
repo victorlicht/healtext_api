@@ -1,7 +1,7 @@
 from datetime import datetime
 import re
-from models.models import LabResult
-from nlp.diabete_dict import DIABETES_TESTS
+from app.models.models import LabResult
+from app.nlp.diabete_dict import DIABETES_TESTS
 
 def extract_time(text):
     #Extract Time from text

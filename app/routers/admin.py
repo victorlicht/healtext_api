@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, Form, HTTPException, status
 from sqlalchemy.orm import Session
-from configs.db import get_session
-from schemas import schemas
-from models import models
+from app.configs.db import get_session
+from app.schemas import schemas
+from app.models import models
 from jose import jwt
-from configs.config import SECRET_KEY, ALGORITHM
-from auth.bearer import JWTBearer
+from app.configs.config import SECRET_KEY, ALGORITHM
+from app.auth.bearer import JWTBearer
 import uuid, datetime
-from auth.utils import verify_password, create_access_token, create_refresh_token, get_hashed_password
+from app.auth.utils import verify_password, create_access_token, create_refresh_token, get_hashed_password
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 @router.get('/users')

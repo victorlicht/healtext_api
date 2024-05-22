@@ -1,9 +1,9 @@
-from nlp.preprocess import preprocess_lab_tests_text, preprocess_text
-from utils.upload_ehr import upload_document
-from tasks.sections import sections_extraction, insert_processed_ehr
-from nlp.symptoms_extractions import detect_symptoms_diabetes, insert_symptoms
-from predictions.diabetes import predict_prediabetes
-from nlp.diabete_dict import DIABETES_SYMPTOMS
+from app.nlp.preprocess import preprocess_lab_tests_text, preprocess_text
+from app.utils.upload_ehr import upload_document
+from app.tasks.sections import sections_extraction, insert_processed_ehr
+from app.nlp.symptoms_extractions import detect_symptoms_diabetes, insert_symptoms
+from app.predictions.diabetes import predict_prediabetes
+from app.nlp.diabete_dict import DIABETES_SYMPTOMS
 
 def process_medical_document(session, file, user_id, ill):
     doc_id = upload_document(session, file, user_id)

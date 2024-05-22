@@ -1,4 +1,4 @@
-from nlp.diabete_dict import DIABETES_SYMPTOMS
+from app.nlp.diabete_dict import DIABETES_SYMPTOMS
 
 def predict_prediabetes(labs, symptoms):
     # Initialize variables to track test values

@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from alembic.config import Config
 
-from models.models import Base
+from app.models.models import Base
 # Configure Alembic for database connection details
 
 config = Config("alembic.ini")  # Replace with your Alembic config file path

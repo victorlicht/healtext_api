@@ -1,4 +1,4 @@
-from models.models import Category
+from app.models.models import Category
 from sqlalchemy.orm import sessionmaker
 
 def add_categories(db_session: sessionmaker, categories):

@@ -6,8 +6,8 @@ from sqlalchemy.orm import sessionmaker
 from nltk.corpus import stopwords, wordnet
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
-from models.models import ProcessedEhr
-from nlp.lab_results_extractions import extract_results, parse_and_store_lab_results
+from app.models.models import ProcessedEhr
+from app.nlp.lab_results_extractions import extract_results, parse_and_store_lab_results
 # from .symptoms_extractions import detect_symptoms, NEGATION_PHRASES, DIABETES_SYMPTOMS
 NEGATION_PHRASES = ['deny', 'denies', 'no', 'not', 'without', 'never', 'none', 'neither', 'nor', 'nowhere', 'n\'t']
 

@@ -2,7 +2,7 @@ import os
 import re
 import uuid
 from sqlalchemy.orm import sessionmaker
-from models.models import Category, ProcessedEhr
+from app.models.models import Category, ProcessedEhr
 
 
 def create_path(folder, id):

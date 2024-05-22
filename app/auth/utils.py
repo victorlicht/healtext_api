@@ -2,7 +2,7 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from typing import Union, Any
 from jose import jwt
-from configs.config import SECRET_KEY, ALGORITHM
+from app.configs.config import SECRET_KEY, ALGORITHM
 JWT_REFRESH_SECRET_KEY = "13ugfdfgh@#$%^@&jkl45678902"
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 100  # 30 minutes

@@ -1,7 +1,7 @@
 import difflib
 import re
 from sqlalchemy.orm import sessionmaker
-from models.models import Symptom
+from app.models.models import Symptom
 
 
 

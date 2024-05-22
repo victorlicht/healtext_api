@@ -2,7 +2,7 @@ import os
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 from werkzeug.utils import secure_filename
-from models.models import EhrUpload
+from app.models.models import EhrUpload
 import uuid
 
 def upload_document(db_session: sessionmaker, file_obj, uid):
