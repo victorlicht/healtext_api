@@ -3,8 +3,8 @@ app/.env
 __pycache__
 app/alembic/versions
 app/alembic/script.py.mako
-app/data/*
-app/alembic.ini
+data/*
+alembic.ini
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

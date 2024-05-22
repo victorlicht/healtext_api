@@ -1,6 +1,7 @@
 import datetime
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.schemas import schemas
 from app.models import models
@@ -25,6 +26,11 @@ def login(request: schemas.requestdetails, db: Session = Depends(get_session)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect password or email"
         )
+    if not user.is_verified:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Email not verfied"
+        )
     role = user.role
     access=create_access_token(user.id)
     refresh = create_refresh_token(user.id)
@@ -42,9 +48,14 @@ def login(request: schemas.requestdetails, db: Session = Depends(get_session)):
 
 @router.post("/register")
 def register_user(user: schemas.UserCreate, session: Session = Depends(get_session)):
-    existing_user = session.query(models.User).filter_by(email=user.email).first()
-    if existing_user:
+    existing_email_user = session.query(models.User).filter_by(email=user.email).first()
+    existing_phone_user = session.query(models.User).filter_by(phone=user.phone).first()
+
+    if existing_email_user:
         raise HTTPException(status_code=400, detail="Email already registered")
+    
+    if existing_phone_user:
+        raise HTTPException(status_code=400, detail="Phone number already registered")
 
     encrypted_password = get_hashed_password(user.password)
     verification_token = str(uuid.uuid4())
@@ -70,8 +81,11 @@ def register_user(user: schemas.UserCreate, session: Session = Depends(get_sessi
 
     send_verification_email(user.email, verification_token)
 
-    return {"message": "User created successfully. Please check your email to verify your account."}
-
+    return JSONResponse(
+            status_code=status.HTTP_201_CREATED,
+            content={"message: user created successfully. Please check your email to verify your account."},
+            media_type="application/json"
+        )
 
 
 @router.post('/change-password')
@@ -95,9 +109,16 @@ def change_password(request: schemas.changepassword, db: Session = Depends(get_s
         encrypted_password = get_hashed_password(request.new_password)
         user.password = encrypted_password
         db.commit()
-        return {"message": "Password changed successfully"}
+        return JSONResponse(    
+            status_code=status.HTTP_200_OK,
+            content={"message": "Password Changed Successfully"}
+        )  
     else: 
-        return {"token not valid"}
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"error": "Token not valid"},
+            media_type="application/json"
+        )
 
 
 
@@ -115,10 +136,17 @@ def logout(dependencies=Depends(JWTBearer()), session: Session = Depends(get_ses
     if existing_token:
         session.delete(existing_token)
         session.commit()
-        return {"message": "Logout Successfully"}
+        return JSONResponse(    
+            status_code=status.HTTP_200_OK,
+            content={"message": "Logout Successfully"}
+        )    
     else:
         # Handle the case where the token is not found (optional)
-        return {"message": "Invalid or expired token"}
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"error": "Token not valid"},
+            media_type="application/json"
+        )
 
 
    
@@ -132,4 +160,7 @@ def verify_email(token: str, session: Session = Depends(get_session)):
     user.verification_token = None  # Clear the token once verified
     session.commit()
 
-    return {"message": "Email verified successfully"}
+    return JSONResponse(    
+        status_code=status.HTTP_200_OK,
+        content={"message": "Email Verified Successfully"}
+    )    

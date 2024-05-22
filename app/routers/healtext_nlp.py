@@ -1,7 +1,6 @@
 from fastapi import Depends, File, UploadFile, Form, status
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
-from app.schemas import schemas
 from app.models import models
 from jose import jwt
 from app.configs.config import SECRET_KEY, ALGORITHM
@@ -29,17 +28,26 @@ async def upload_ehr(dependencies=Depends(JWTBearer()), file: UploadFile = File(
             models.TokenTable.uid == user_id,
             models.TokenTable.access_token == token
         ).first()
-        if existing_token: 
-            return process_medical_document(session, file, user_id, "diabetes")
+        if existing_token:
+            result = process_medical_document(session, file, user_id, "diabetes")
+            return JSONResponse(
+                status_code=status.HTTP_200_OK,
+                content={"result": result},
+                media_type="application/json"
+            )
         else:
-            return {"message": "Invalid or expired token"}
-    
+            return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"error": "Token not valid"},
+            media_type="application/json"
+        )
 
     except Exception as e:
         session.rollback()
         logger.error(f"Error: {str(e)}")
         return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
             content={"error": "can't upload file, try later."},
             media_type="application/json"
         )
+

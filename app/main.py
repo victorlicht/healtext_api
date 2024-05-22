@@ -19,8 +19,8 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
-app.include_router(router)
-app.include_router(server_router)
-app.include_router(users_router)
-app.include_router(auth_router)
-app.include_router(admin_router)
+app.include_router(router, prefix="/api/v1")
+app.include_router(server_router, prefix="/api/v1")
+app.include_router(users_router, prefix="/api/v1")
+app.include_router(auth_router, prefix="/api/v1")
+app.include_router(admin_router, prefix="/api/v1")

@@ -1,5 +1,4 @@
 import os
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 from werkzeug.utils import secure_filename
 from app.models.models import EhrUpload
@@ -13,6 +12,7 @@ def upload_document(db_session: sessionmaker, file_obj, uid):
     upload_record = EhrUpload(id=upload_id, uid=uid, doc_format=".txt", doc_url=os.path.join(data_dir, f"{upload_id}.txt"))
     db_session.add(upload_record)
     filepath = os.path.join(data_dir, f"{upload_id}.txt")
+    print(filepath, data_dir)
     with open(filepath, "wb") as f:
         f.write(file_obj.file.read())  
     db_session.commit()

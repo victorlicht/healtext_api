@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Form, HTTPException, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.configs.db import get_session
 from app.schemas import schemas
@@ -48,6 +49,11 @@ def register_user(user: schemas.UserCreate,dependencies=Depends(JWTBearer()), se
         admin = session.query(models.User).filter(models.User.id == admin_id).first()
         if admin.role == 'admin':
             existing_user = session.query(models.User).filter_by(email=user.email).first()
+            existing_phone_user = session.query(models.User).filter_by(phone=user.phone).first()
+
+            if existing_phone_user:
+                raise HTTPException(status_code=400, detail="Phone number already registered")
+
             if existing_user:
                 raise HTTPException(status_code=400, detail="Email already registered")
 
@@ -109,7 +115,11 @@ def delete_user(user_id:str, dependencies=Depends(JWTBearer()), session: Session
                 detail="You don't have permission to access this resource"
             )
     else:
-        return {"message": "Invalid or expired token"}
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"error": "Token not valid"},
+            media_type="application/json"
+        )
     
 @router.put('/users/{user_id}')
 def edit_user(user_data: schemas.UserAdminIn, user_id:str, dependencies=Depends(JWTBearer()), session: Session = Depends(get_session)):
@@ -124,6 +134,16 @@ def edit_user(user_data: schemas.UserAdminIn, user_id:str, dependencies=Depends(
     if existing_token:
         admin = session.query(models.User).filter(models.User.id == admin_id).first()
         user = session.query(models.User).filter(models.User.id == user_id).first()
+
+        existing_email_user = session.query(models.User).filter_by(email=user.email).first()
+        existing_phone_user = session.query(models.User).filter_by(phone=user.phone).first()
+
+        if existing_email_user:
+            raise HTTPException(status_code=400, detail="Email already registered")
+    
+        if existing_phone_user:
+            raise HTTPException(status_code=400, detail="Phone number already registered")
+
 
         if user is None:
             raise HTTPException(status_code=404, detail="User not found")
@@ -142,4 +162,8 @@ def edit_user(user_data: schemas.UserAdminIn, user_id:str, dependencies=Depends(
             session.refresh(user)
             return user
     else:
-        return {"message": "Invalid or expired token"}
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"error": "Token not valid"},
+            media_type="application/json"
+        )

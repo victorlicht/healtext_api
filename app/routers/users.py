@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Body, Depends, HTTPException, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.configs.db import get_session
 from app.schemas import schemas
@@ -27,7 +28,11 @@ def get_current_user(dependencies=Depends(JWTBearer()), session: Session = Depen
 
         return user
     else:
-        return {"message": "Invalid or expired token"}
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"error": "Token not valid"},
+            media_type="application/json"
+        )
     
 @router.put('/me')
 def edit_user(user_data: schemas.UserIn, dependencies=Depends(JWTBearer()), session: Session = Depends(get_session)):
@@ -57,7 +62,11 @@ def edit_user(user_data: schemas.UserIn, dependencies=Depends(JWTBearer()), sess
         session.refresh(user)
         return user
     else:
-        return {"message": "Invalid or expired token"}
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"error": "Token not valid"},
+            media_type="application/json"
+        )
 
 @router.delete('/me')
 def delete_user( dependencies=Depends(JWTBearer()),confirm_password:str = Query(...), session: Session = Depends(get_session)):
@@ -81,8 +90,15 @@ def delete_user( dependencies=Depends(JWTBearer()),confirm_password:str = Query(
         session.delete(user)
         session.delete(existing_token)
         session.commit()
-        return {"message": "User deleted successfully"}
+        return JSONResponse(    
+            status_code=status.HTTP_200_OK,
+            content={"message": "User deleted successfully"}
+        )    
     else:
-        return {"message": "Invalid or expired token"}
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"error": "Token not valid"},
+            media_type="application/json"
+        )
 
     
