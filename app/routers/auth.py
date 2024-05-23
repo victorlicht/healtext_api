@@ -100,7 +100,7 @@ def change_password(request: schemas.changepassword, db: Session = Depends(get_s
     ).first()
 
     if existing_token:
-        user = db.query(models.User).filter(models.User.email == request.email).first()
+        user = db.query(models.User).filter(models.User.id == user_id).first()
         if user is None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found")
         

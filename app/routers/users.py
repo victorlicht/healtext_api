@@ -49,8 +49,6 @@ def edit_user(user_data: schemas.UserIn, dependencies=Depends(JWTBearer()), sess
         if user is None:
             raise HTTPException(status_code=404, detail="User not found")
 
-        user.email=user_data.email
-        user.phone=user_data.phone
         user.full_name=user_data.full_name
         user.address=user_data.address
         user.date_of_birth=user_data.date_of_birth

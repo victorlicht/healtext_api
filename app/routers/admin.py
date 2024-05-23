@@ -135,21 +135,9 @@ def edit_user(user_data: schemas.UserAdminIn, user_id:str, dependencies=Depends(
         admin = session.query(models.User).filter(models.User.id == admin_id).first()
         user = session.query(models.User).filter(models.User.id == user_id).first()
 
-        existing_email_user = session.query(models.User).filter_by(email=user.email).first()
-        existing_phone_user = session.query(models.User).filter_by(phone=user.phone).first()
-
-        if existing_email_user:
-            raise HTTPException(status_code=400, detail="Email already registered")
-    
-        if existing_phone_user:
-            raise HTTPException(status_code=400, detail="Phone number already registered")
-
-
         if user is None:
             raise HTTPException(status_code=404, detail="User not found")
         if admin.role == 'admin':
-            user.email=user_data.email
-            user.phone=user_data.phone
             user.full_name=user_data.full_name
             user.address=user_data.address
             user.date_of_birth=user_data.date_of_birth
