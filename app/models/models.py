@@ -90,6 +90,10 @@ class Symptom(Base):
     symptom = Column(String, nullable=False)
     ill_diagnosed = Column(String(128), nullable=False)
     doc_id = Column(String(36), ForeignKey("ehr_uploads.id"), nullable=False)
+    def to_dict(self):
+        return {
+            "symptom": self.symptom,
+        }
 
 
 class FamilyHistory(Base):
@@ -101,6 +105,7 @@ class FamilyHistory(Base):
     doc_id = Column(String(36), ForeignKey("ehr_uploads.id"), nullable=False)
 
 
+
 class LabResult(Base):
     __tablename__ = "lab_result"
 
@@ -110,6 +115,12 @@ class LabResult(Base):
     date_time = Column(DateTime, nullable=False)
     doc_id = Column(String(36), ForeignKey("ehr_uploads.id"), nullable=False)
     ill_diagnosed = Column(String(128), nullable=False)
+    def to_dict(self):
+        return {
+            "test_name": self.test_name,
+            "value": self.value,
+            "date_time": self.date_time.isoformat(),
+        }
 
 
 class Medication(Base):
@@ -130,3 +141,10 @@ class Result(Base):
     timestamp = Column(TIMESTAMP, nullable=False, default=datetime.datetime.now)
     doc_id = Column(String(36), ForeignKey("ehr_uploads.id"), nullable=False)
     ill_results = Column(JSON, nullable=False)
+
+    def to_dict(self):
+        return {
+            "timestamp": self.timestamp.isoformat(),
+            "doc_id": self.doc_id,
+            "ill_results": self.ill_results
+        }
