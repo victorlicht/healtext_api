@@ -58,7 +58,7 @@ def register_user(user: schemas.UserCreate, session: Session = Depends(get_sessi
         raise HTTPException(status_code=400, detail="Phone number already registered")
 
     encrypted_password = get_hashed_password(user.password)
-    verification_token = str(uuid.uuid4())
+    verification_token_str = str(uuid.uuid4())
 
     new_user = models.User(
         id=str(uuid.uuid4()),
@@ -70,6 +70,7 @@ def register_user(user: schemas.UserCreate, session: Session = Depends(get_sessi
         address=user.address,
         date_of_birth=user.date_of_birth,
         gender=user.gender,
+        verification_token=verification_token_str
         country=user.country,
         is_verified=False,
         role=user.role,
@@ -79,7 +80,7 @@ def register_user(user: schemas.UserCreate, session: Session = Depends(get_sessi
     session.commit()
     session.refresh(new_user)
 
-    send_verification_email(user.email, verification_token)
+    send_verification_email(user.email, verification_token_str)
 
     return JSONResponse(
             status_code=status.HTTP_201_CREATED,

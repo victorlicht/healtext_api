@@ -15,7 +15,7 @@ def send_verification_email(email: str, token: str):
     message["From"] = sender_email
     message["To"] = receiver_email
 
-    verification_link = f"http://healme.tech/auth/verify/{token}"
+    verification_link = f"http://api.healme.tech/auth/verify/{token}"
     text = f"Hi,\nPlease verify your email by clicking on the following link: {verification_link}"
     part = MIMEText(text, "plain")
 
